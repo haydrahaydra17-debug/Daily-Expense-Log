@@ -1,0 +1,612 @@
+<!DOCTYPE html>
+<html lang="ar">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>برنامج المصاريف اليومية المطور</title>
+    <style>
+        body {
+            font-family: 'Cairo', Arial, sans-serif;
+            background: linear-gradient(135deg, #88d8e8 0%, #f2f2f2 100%);
+            margin: 0;
+            padding: 0;
+            direction: rtl;
+        }
+        .container {
+            max-width: 400px;
+            margin: 40px auto;
+            background: #fff;
+            border-radius: 16px;
+            box-shadow: 0 8px 24px rgba(0,0,0,0.08);
+            padding: 24px 16px;
+        }
+        h1 {
+            text-align: center;
+            color: #2a9d8f;
+            margin-bottom: 16px;
+        }
+        .actions {
+            display: flex;
+            justify-content: center;
+            gap: 12px;
+            margin-bottom: 16px;
+        }
+        #add-btn, #history-btn {
+            background: #2a9d8f;
+            color: #fff;
+            border: none;
+            border-radius: 50%;
+            width: 48px;
+            height: 48px;
+            font-size: 28px;
+            cursor: pointer;
+            transition: background 0.2s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        #history-btn {
+            background: #f4a261;
+            font-size: 24px;
+        }
+        #add-btn:hover {
+            background: #21867a;
+        }
+        #history-btn:hover {
+            background: #e89c4e;
+        }
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 99;
+            left: 0; top: 0;
+            width: 100%; height: 100%;
+            background: rgba(0,0,0,0.3);
+        }
+        .modal-content {
+            background: #fff;
+            margin: 60px auto;
+            padding: 20px;
+            border-radius: 12px;
+            max-width: 320px;
+            position: relative;
+            box-shadow: 0 4px 16px rgba(0,0,0,0.15);
+            text-align: center;
+        }
+        .close {
+            position: absolute;
+            right: 14px;
+            top: 10px;
+            font-size: 26px;
+            cursor: pointer;
+            color: #888;
+        }
+        #expense-form input {
+            width: 85%;
+            padding: 8px;
+            margin: 10px 0;
+            border: 1px solid #ededed;
+            border-radius: 6px;
+            font-size: 16px;
+            outline: none;
+        }
+        #save-btn {
+            background: #2a9d8f;
+            color: #fff;
+            border: none;
+            padding: 8px 24px;
+            border-radius: 6px;
+            font-size: 16px;
+            cursor: pointer;
+            margin-top: 8px;
+            transition: background 0.2s;
+        }
+        #save-btn:hover {
+            background: #21867a;
+        }
+        .search-bar {
+            margin-bottom: 18px;
+            text-align: center;
+        }
+        #search {
+            padding: 8px;
+            width: 85%;
+            border: 1px solid #ededed;
+            border-radius: 6px;
+            font-size: 16px;
+        }
+        #expense-list {
+            list-style: none;
+            padding: 0;
+            margin: 0 0 12px 0;
+        }
+        #expense-list li {
+            background: #f6f6f6;
+            margin-bottom: 8px;
+            padding: 10px;
+            border-radius: 8px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 17px;
+            transition: background 0.2s;
+        }
+        #expense-list li:hover {
+            background: #e0f7fa;
+        }
+        .expense-name {
+            color: #555;
+        }
+        .expense-price {
+            color: #e76f51;
+            font-weight: bold;
+        }
+        .delete-btn {
+            background: #e63946;
+            color: #fff;
+            border: none;
+            border-radius: 50%;
+            width: 28px;
+            height: 28px;
+            font-size: 18px;
+            cursor: pointer;
+            margin-right: 8px;
+            margin-left: 4px;
+        }
+        .summary {
+            text-align: center;
+            margin-top: 18px;
+        }
+        #total-btn {
+            background: #f4a261;
+            color: #fff;
+            border: none;
+            border-radius: 8px;
+            padding: 8px 20px;
+            font-size: 16px;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+        #total-btn:hover {
+            background: #e89c4e;
+        }
+        #total {
+            font-size: 20px;
+            color: #2a9d8f;
+            margin-top: 10px;
+            font-weight: bold;
+        }
+        #chart {
+            display: block;
+            margin: 22px auto 0 auto;
+            background: #fff;
+            border-radius: 10px;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.08);
+        }
+        /* سجل اليومي */
+        #history-modal .modal-content {
+            max-width: 350px;
+            text-align: right;
+        }
+        #history-list {
+            list-style: none;
+            padding: 0;
+            margin: 14px 0 0 0;
+        }
+        #history-list li {
+            background: #e9ecef;
+            margin-bottom: 7px;
+            padding: 10px;
+            border-radius: 8px;
+            cursor: pointer;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        #history-list li:hover {
+            background: #d1e7dd;
+        }
+        .history-date {
+            color: #2a9d8f;
+            font-size: 15px;
+        }
+        .history-count {
+            background: #f4a261;
+            color: #fff;
+            border-radius: 18px;
+            padding: 2px 12px;
+            font-size: 15px;
+        }
+        .history-delete-btn {
+            background: #e63946;
+            color: #fff;
+            border: none;
+            border-radius: 50%;
+            width: 28px;
+            height: 28px;
+            font-size: 17px;
+            cursor: pointer;
+            margin-right: 8px;
+            margin-left: 8px;
+        }
+        #sum-all-btn {
+            background: #2a9d8f;
+            color: #fff;
+            border: none;
+            border-radius: 8px;
+            padding: 8px 20px;
+            font-size: 15px;
+            cursor: pointer;
+            margin-bottom: 7px;
+            margin-top: 6px;
+        }
+        #sum-all-btn:hover {
+            background: #21867a;
+        }
+        #delete-all-btn {
+            background: #e63946;
+            color: #fff;
+            border: none;
+            border-radius: 8px;
+            padding: 8px 20px;
+            font-size: 15px;
+            cursor: pointer;
+            margin-bottom: 7px;
+            margin-top: 6px;
+            margin-right: 6px;
+        }
+        #delete-all-btn:hover {
+            background: #b71c1c;
+        }
+        #sum-all-total {
+            font-size: 18px;
+            color: #e76f51;
+            font-weight: bold;
+            margin-bottom: 9px;
+            margin-top: 2px;
+        }
+        /* فاتورة اليوم */
+        #bill-modal .modal-content {
+            max-width: 350px;
+            text-align: right;
+        }
+        #bill-list {
+            list-style: none;
+            margin: 0;
+            padding: 0;
+        }
+        #bill-list li {
+            background: #f6f6f6;
+            margin-bottom: 6px;
+            padding: 8px;
+            border-radius: 7px;
+            display: flex;
+            justify-content: space-between;
+            font-size: 15px;
+        }
+        #bill-total {
+            color: #e76f51;
+            font-weight: bold;
+            font-size: 18px;
+            margin-top: 12px;
+            text-align: left;
+        }
+        #save-history-btn {
+            background: #2a9d8f;
+            color: #fff;
+            border: none;
+            border-radius: 8px;
+            padding: 8px 20px;
+            font-size: 16px;
+            cursor: pointer;
+            transition: background 0.2s;
+            margin-top: 8px;
+        }
+        #save-history-btn:hover {
+            background: #21867a;
+        }
+        @media (max-width: 480px) {
+            .container {
+                max-width: 98vw;
+                padding: 12px 4px;
+            }
+            .modal-content {
+                max-width: 95vw;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>برنامج المصاريف اليومية المطور</h1>
+        <div class="actions">
+            <button id="add-btn" title="إضافة مصروف"><span>+</span></button>
+            <button id="history-btn" title="سجل اليومي"><span>📆</span></button>
+        </div>
+        <div id="expense-form" class="modal">
+            <div class="modal-content">
+                <span class="close" id="close-form">&times;</span>
+                <h2>إضافة مصروف جديد</h2>
+                <input type="text" id="item-name" placeholder="اسم المادة">
+                <input type="number" id="item-price" placeholder="السعر (ل.س)">
+                <button id="save-btn">حفظ</button>
+            </div>
+        </div>
+        <div class="search-bar">
+            <input type="text" id="search" placeholder="بحث عن مادة...">
+        </div>
+        <ul id="expense-list"></ul>
+        <div class="summary">
+            <button id="total-btn">عرض مجموع المصروف اليومي</button>
+            <div id="total"></div>
+            <button id="save-history-btn" title="حفظ المصروفات في سجل اليومي">حفظ المصروفات في سجل اليومي</button>
+        </div>
+        <canvas id="chart" width="350" height="120"></canvas>
+    </div>
+
+    <!-- سجل اليومي -->
+    <div id="history-modal" class="modal">
+        <div class="modal-content">
+            <span class="close" id="close-history">&times;</span>
+            <h2>سجل المصروفات اليومية</h2>
+            <div style="display:flex;gap:5px;">
+                <button id="sum-all-btn">جمع مصاريف كل الأيام</button>
+                <button id="delete-all-btn">حذف كل الأيام</button>
+            </div>
+            <div id="sum-all-total"></div>
+            <ul id="history-list"></ul>
+        </div>
+    </div>
+    <!-- فاتورة اليوم -->
+    <div id="bill-modal" class="modal">
+        <div class="modal-content">
+            <span class="close" id="close-bill">&times;</span>
+            <h3 id="bill-date"></h3>
+            <ul id="bill-list"></ul>
+            <div id="bill-total"></div>
+        </div>
+    </div>
+
+    <script>
+        // عناصر الصفحة
+        const listEl = document.getElementById('expense-list');
+        const addBtn = document.getElementById('add-btn');
+        const expenseForm = document.getElementById('expense-form');
+        const closeFormBtn = document.getElementById('close-form');
+        const saveBtn = document.getElementById('save-btn');
+        const itemNameInput = document.getElementById('item-name');
+        const itemPriceInput = document.getElementById('item-price');
+        const totalBtn = document.getElementById('total-btn');
+        const totalEl = document.getElementById('total');
+        const searchInput = document.getElementById('search');
+        const chartCanvas = document.getElementById('chart');
+        const saveHistoryBtn = document.getElementById('save-history-btn');
+        // سجل اليومي
+        const historyBtn = document.getElementById('history-btn');
+        const historyModal = document.getElementById('history-modal');
+        const closeHistoryBtn = document.getElementById('close-history');
+        const historyListEl = document.getElementById('history-list');
+        const sumAllBtn = document.getElementById('sum-all-btn');
+        const sumAllTotalEl = document.getElementById('sum-all-total');
+        const deleteAllBtn = document.getElementById('delete-all-btn');
+        // فاتورة اليوم
+        const billModal = document.getElementById('bill-modal');
+        const closeBillBtn = document.getElementById('close-bill');
+        const billDateEl = document.getElementById('bill-date');
+        const billListEl = document.getElementById('bill-list');
+        const billTotalEl = document.getElementById('bill-total');
+
+        // اليوم الحالي
+        const today = new Date();
+        const todayKey = 'expenses_' + today.toISOString().slice(0,10);
+        let expenses = loadExpenses();
+
+        // تحميل المصاريف
+        function loadExpenses() {
+            const data = localStorage.getItem(todayKey);
+            return data ? JSON.parse(data) : [];
+        }
+        function saveExpenses() {
+            localStorage.setItem(todayKey, JSON.stringify(expenses));
+        }
+
+        // عرض المصاريف في الصفحة الرئيسية
+        function renderExpenses(filter = '') {
+            listEl.innerHTML = '';
+            expenses.filter(exp => exp.name.includes(filter)).forEach((exp, i) => {
+                const li = document.createElement('li');
+                li.innerHTML = `
+                    <span class="expense-name">${exp.name}</span>
+                    <span class="expense-price">${exp.price.toLocaleString()} ل.س</span>
+                    <button class="delete-btn" title="حذف" onclick="deleteExpense(${i})">&times;</button>
+                `;
+                listEl.appendChild(li);
+            });
+            drawChart();
+        }
+
+        // حذف مادة من الصفحة الرئيسية فقط (لا يؤثر على السجل اليومي)
+        window.deleteExpense = function(index) {
+            expenses.splice(index, 1);
+            saveExpenses();
+            renderExpenses(searchInput.value);
+        }
+
+        // إضافة مصروف جديد
+        addBtn.onclick = () => {
+            expenseForm.style.display = 'block';
+            itemNameInput.value = '';
+            itemPriceInput.value = '';
+        };
+        closeFormBtn.onclick = () => expenseForm.style.display = 'none';
+
+        saveBtn.onclick = () => {
+            const name = itemNameInput.value.trim();
+            const price = Number(itemPriceInput.value);
+            if (name && price > 0) {
+                expenses.push({name, price});
+                saveExpenses();
+                renderExpenses(searchInput.value);
+                expenseForm.style.display = 'none';
+            } else {
+                alert('يرجى إدخال اسم المادة والسعر بشكل صحيح!');
+            }
+        };
+
+        // بحث سريع
+        searchInput.oninput = () => renderExpenses(searchInput.value);
+
+        // حساب المجموع
+        totalBtn.onclick = () => {
+            const total = expenses.reduce((sum, exp) => sum + exp.price, 0);
+            totalEl.textContent = `المجموع: ${total.toLocaleString()} ل.س`;
+        };
+
+        // رسم المصاريف
+        function drawChart() {
+            const ctx = chartCanvas.getContext('2d');
+            ctx.clearRect(0, 0, chartCanvas.width, chartCanvas.height);
+            if (expenses.length === 0) return;
+            const labels = expenses.map(e => e.name);
+            const data = expenses.map(e => e.price);
+            const maxVal = Math.max(...data, 1);
+            const barWidth = 30;
+            const gap = 15;
+            ctx.font = '13px Cairo, Arial';
+            data.forEach((val, i) => {
+                const x = i * (barWidth + gap) + 30;
+                const h = Math.round((val / maxVal) * 80);
+                ctx.fillStyle = '#2a9d8f';
+                ctx.fillRect(x, chartCanvas.height - h - 28, barWidth, h);
+                ctx.fillStyle = '#555';
+                ctx.fillText(labels[i].slice(0, 7), x, chartCanvas.height - 8); // اسم مختصر
+                ctx.fillStyle = '#e76f51';
+                ctx.fillText(val.toLocaleString(), x, chartCanvas.height - h - 36); // السعر
+            });
+        }
+
+        // سجل اليومي: حفظ المصروفات لليوم الحالي
+        saveHistoryBtn.onclick = () => {
+            if (expenses.length === 0) {
+                alert('لا توجد مصروفات اليوم لحفظها!');
+                return;
+            }
+            let history = loadHistory();
+            const dateStr = today.toLocaleDateString('ar-EG', { weekday:'long', year:'numeric', month:'2-digit', day:'2-digit' });
+            const key = todayKey;
+            if (history.some(h => h.key === key)) {
+                alert('مصروفات هذا اليوم محفوظة بالفعل في السجل.');
+                return;
+            }
+            // نسخ المصاريف الحالية للسجل بشكل مستقل
+            localStorage.setItem('archive_' + key, JSON.stringify(expenses)); 
+            history.push({ key, date: dateStr, count: expenses.length });
+            saveHistory(history);
+            alert('تم حفظ اليوم في سجل المصروفات اليومية.');
+        };
+
+        function loadHistory() {
+            const data = localStorage.getItem('expenses_history');
+            return data ? JSON.parse(data) : [];
+        }
+        function saveHistory(history) {
+            localStorage.setItem('expenses_history', JSON.stringify(history));
+        }
+
+        // فتح سجل الأيام
+        historyBtn.onclick = () => {
+            renderHistory();
+            sumAllTotalEl.textContent = '';
+            historyModal.style.display = 'block';
+        };
+        closeHistoryBtn.onclick = () => historyModal.style.display = 'none';
+
+        // عرض سجل الأيام مع زر سلة حذف لكل يوم
+        function renderHistory() {
+            const history = loadHistory();
+            historyListEl.innerHTML = '';
+            if (history.length === 0) {
+                historyListEl.innerHTML = '<li>لا يوجد سجل محفوظ حتى الآن.</li>';
+                return;
+            }
+            history.sort((a,b)=>b.key.localeCompare(a.key)); // الأحدث أولاً
+            history.forEach((item, idx) => {
+                const li = document.createElement('li');
+                li.innerHTML = `
+                    <span class="history-date" style="flex:1" onclick="showBill('${item.key}','${item.date}')">${item.date}</span>
+                    <span class="history-count" onclick="showBill('${item.key}','${item.date}')">${item.count} مادة</span>
+                    <button class="history-delete-btn" title="حذف اليوم" onclick="deleteHistoryDay('${item.key}',${idx})">&#128465;</button>
+                `;
+                historyListEl.appendChild(li);
+            });
+        }
+
+        // حذف يوم واحد من السجل
+        window.deleteHistoryDay = function(key, idx){
+            if(confirm('هل أنت متأكد أنك تريد حذف هذا اليوم من السجل؟')) {
+                let history = loadHistory();
+                history.splice(idx,1);
+                saveHistory(history);
+                localStorage.removeItem('archive_' + key);
+                renderHistory();
+            }
+        };
+
+        // حذف كل الأيام من السجل
+        deleteAllBtn.onclick = () => {
+            if(confirm('هل أنت متأكد أنك تريد حذف كل الأيام من السجل؟')) {
+                let history = loadHistory();
+                history.forEach(item => localStorage.removeItem('archive_' + item.key));
+                localStorage.removeItem('expenses_history');
+                renderHistory();
+                sumAllTotalEl.textContent = '';
+            }
+        };
+
+        // جمع مصاريف كل الأيام
+        sumAllBtn.onclick = () => {
+            const history = loadHistory();
+            let sum = 0;
+            let days = 0;
+            history.forEach(item => {
+                const dayExpenses = JSON.parse(localStorage.getItem('archive_' + item.key) || '[]');
+                sum += dayExpenses.reduce((s, exp) => s + exp.price, 0);
+                if(dayExpenses.length > 0) days++;
+            });
+            sumAllTotalEl.textContent = `مجموع مصاريف كل الأيام المحفوظة: ${sum.toLocaleString()} ل.س (${days} يوم)`;
+        };
+
+        // عرض فاتورة اليوم من السجل (لا تتأثر بالحذف من الصفحة الرئيسية)
+        window.showBill = function(key, date) {
+            const dayExpenses = JSON.parse(localStorage.getItem('archive_' + key) || '[]');
+            billDateEl.textContent = `فاتورة يوم ${date}`;
+            billListEl.innerHTML = '';
+            if (dayExpenses.length === 0) {
+                billListEl.innerHTML = '<li>لا توجد مصروفات محفوظة لهذا اليوم.</li>';
+                billTotalEl.textContent = '';
+                return;
+            }
+            let total = 0;
+            dayExpenses.forEach(exp => {
+                total += exp.price;
+                const li = document.createElement('li');
+                li.innerHTML = `<span>${exp.name}</span><span>${exp.price.toLocaleString()} ل.س</span>`;
+                billListEl.appendChild(li);
+            });
+            billTotalEl.textContent = `المجموع: ${total.toLocaleString()} ل.س`;
+            billModal.style.display = 'block';
+        }
+        closeBillBtn.onclick = () => billModal.style.display = 'none';
+
+        // إغلاق النوافذ عند الضغط خارجها
+        window.onclick = function(event) {
+            if (event.target == expenseForm) expenseForm.style.display = "none";
+            if (event.target == historyModal) historyModal.style.display = "none";
+            if (event.target == billModal) billModal.style.display = "none";
+        };
+
+        // عند فتح الصفحة
+        renderExpenses();
+    </script>
+</body>
+</html>
